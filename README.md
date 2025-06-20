@@ -26,7 +26,7 @@ Add to your project's `Cargo.toml`:
 
 ```toml
 [dependencies]
-apexforge_afe = "0.2.1"
+apexforge_afe = "0.1.0"
 ```
 
 Then run:
@@ -46,29 +46,15 @@ use apexforge_afe::AfeBuilder;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // Initialize builder with app name and version
-    let mut builder = AfeBuilder::new("HelloWorld", "1.0.0");
-
-    // Add a simple Lua function and raw code
-    builder
-        .add_lua_function("greet", vec!["name"], r#"
-            print("Hello from ApexForge, " .. name)
-        "#)
-        .add_lua_code(r#"
-            greet("Developer")
-        "#);
-
-    // Customize permissions, dependencies, env vars, entry point (optional)
-    builder
-        .set_permissions("rwxr--r--")
-        .add_dependency("socket");
-        .set_env_var("RUST_LOG", "info")
-        .set_entry_point("greet");
-
-    // Save as executable .afe file
-    let output = "hello.afe";
-    builder.save(output)?;
-    println!("✅ Created {}", output);
+    let mut hello = AfeBuilder::new("HelloWorld", "1.0");
+    hello.add_lua_code(r#"
+        print("Hello, ApexForge World!")
+    "#);
+    
+    let afe_path = "hello.afe";
+    hello.save(&afe_path)?;
+    
+    println!("Created {}", afe_path);
     Ok(())
 }
 ```
