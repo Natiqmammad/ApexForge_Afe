@@ -1,5 +1,5 @@
 apexforge_afe
-A Rust library for generating .afe files for the ApexForge platform. It allows developers to embed Lua scripts with metadata such as application name, version, and permissions, serialized into a compact binary format using bincode. With mlua integration, it supports Lua 5.4 scripts, making it perfect for building ApexForge applications.
+A Rust library for generating .afe files for the ApexForge platform. It allows developers to embed Lua scripts with metadata such as application name, version, and permissions, serialized into a compact binary format using bincode. With mlua integration, it supports Lua 5.4 scripts, making it ideal for building ApexForge applications.
 
 Features
 
@@ -11,10 +11,10 @@ Efficient binary serialization using bincode and serde.
 Installation
 Add the library to your Cargo.toml:
 [dependencies]
-apexforge_afe = "0.2.0"
+apexforge_afe = "0.2.1"
 
 Quick Start
-The following example creates an .afe file that runs a Lua script to print "Hello, ApexForge World!":
+The following example creates an .afe file with a Lua script that prints "Hello, ApexForge World!":
 use apexforge_afe::AfeBuilder;
 use std::error::Error;
 
@@ -39,12 +39,12 @@ Saves the configuration as a binary .afe file.
 
 Key Methods
 
-AfeBuilder::new(app_name, app_version): Create a new builder instance.
-add_lua_function(name, args, body): Define a Lua function with arguments and body.
-add_lua_code(code): Append raw Lua code.
-set_permissions(permissions): Set permissions (e.g., "rwxr-xr-x").
-save(path): Save the .afe file to disk.
-build(): Return an AfeFile struct without saving.
+AfeBuilder::new(app_name, app_version): Creates a new builder instance.
+add_lua_function(name, args, body): Defines a Lua function with arguments and body.
+add_lua_code(code): Appends raw Lua code.
+set_permissions(permissions): Sets permissions (e.g., "rwxr-xr-x").
+save(path): Saves the .afe file to disk.
+build(): Returns an AfeFile struct without saving.
 
 Example Use Cases
 
@@ -53,14 +53,14 @@ Package scripts with metadata for deployment on ApexForge platforms.
 Automate .afe file generation in build pipelines.
 
 Contributing
-We welcome contributions! Please:
+Contributions are welcome! Please:
 
-Submit issues or pull requests on GitHub.
-Adhere to Rust coding standards.
+Submit issues or pull requests at GitHub.
+Follow Rust coding standards.
 Include tests for new features.
 
 License
-Licensed under MIT OR Apache-2.0.
+Dual-licensed under the MIT License or the Apache License, Version 2.0, at your option. See LICENSE-MIT and LICENSE-APACHE files for details.
 Dependencies
 
 bincode: Binary serialization.
