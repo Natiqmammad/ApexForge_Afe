@@ -11,6 +11,7 @@ pub struct AfeFile {
     pub app_version: String,
     pub lua_script: String,
     pub permissions: String, // rwxr-xr-x format
+    pub using:String
 }
 
 pub struct AfeBuilder {
@@ -48,23 +49,24 @@ impl AfeBuilder {
         self
     }
 
-    pub fn build(&self) -> AfeFile {
+    pub fn build(&self,using:String) -> AfeFile {
         AfeFile {
             version: 1,
             app_name: self.app_name.clone(),
             app_version: self.app_version.clone(),
             lua_script: self.lua_script.clone(),
             permissions: self.permissions.clone(),
+            using:using,
         }
     }
 
-    pub fn save(&self, path: &str) -> Result<(), std::io::Error> {
+    pub fn save(&self, path: &str,using_condition:String) -> Result<(), std::io::Error> {
         //STANDART LIBS
         let lua = unsafe {
 
             Lua::unsafe_new_with(StdLib::ALL, LuaOptions::default())
         };
-        let afe = self.build();
+        let afe = self.build(using_condition);
         let encoded = bincode::encode_to_vec(&afe, bincode::config::standard())
             .expect("Encode failed");
 

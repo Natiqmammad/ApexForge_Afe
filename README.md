@@ -1,119 +1,101 @@
-**apexforge\_afe**
+# apexforge_afe
 
-A Rust library for generating `.afe` files for the ApexForge platform. It allows developers to embed Lua scripts with metadata such as application name, version, permissions, dependencies, environment variables, and entry points. Leveraging `bincode` and `serde` for compact binary serialization, and `mlua` for Lua 5.4 integration, `apexforge_afe` makes it easy to build, validate, and package ApexForge applications.
+A Rust library for generating `.afe` (ApexForge Executable) files, embedding Lua scripts with minimal metadata. Designed for simplicity and portability, it uses `bincode` and `serde` for efficient serialization and `mlua` for Lua 5.4 script validation.
 
 ---
 
 ## 📦 Features
 
-* **Fluent Builder API**: Create `.afe` files with chained methods.
-* **Embed Lua Scripts**: Add functions or raw code, validated against Lua 5.4 at build time.
-* **Metadata Support**:
-
-  * Application name & version
-  * File permissions in `rwxr-xr-x` format
-  * Dependencies (other modules or libraries)
-  * Environment variables
-  * Custom entry point (default: `main`)
-* **Efficient Serialization**: Compact binary output using `bincode` and `serde`.
-* **Executable `.afe`**: Optionally emit a Unix shebang header so `.afe` files can be run directly.
+- **Minimal Metadata**: Embed only the essentials — app name, version, permissions, and Lua code.
+- **Builder API**: Chain methods to create `.afe` packages easily.
+- **Lua 5.4 Integration**: Validate scripts using `mlua` with standard libraries.
+- **Binary Serialization**: Compact `.afe` files via `bincode`.
 
 ---
 
 ## 🚀 Installation
 
-Add to your project's `Cargo.toml`:
+Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-apexforge_afe = "0.1.0"
+apexforge_afe = "0.1.1"
 ```
 
-Then run:
+Then build your project:
 
 ```bash
-cargo fetch
+cargo build
 ```
 
 ---
 
 ## 🛠️ Quick Start
 
-Create and save an `.afe` file:
+Create and save a simple `.afe` file:
 
 ```rust
 use apexforge_afe::AfeBuilder;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut hello = AfeBuilder::new("HelloWorld", "1.0");
-    hello.add_lua_code(r#"
-        print("Hello, ApexForge World!")
-    "#);
+    let mut builder = AfeBuilder::new("HelloWorld", "1.0");
     
-    let afe_path = "hello.afe";
-    hello.save(&afe_path)?;
-    
-    println!("Created {}", afe_path);
+    builder
+        .add_lua_function("greet", vec!["name"], r#"print("Hello, "..name)"#)
+        .add_lua_code("greet('ApexForge')")
+        .set_permissions("rwxr-xr-x");
+
+    builder.save("hello.afe", "Printing 'Hello World!' Keyword".to_string())?;
+    println!("Created hello.afe");
     Ok(())
 }
 ```
 
-This example:
-
-1. Initializes the builder for `HelloWorld` v1.0.0.
-2. Defines a Lua function `greet(name)` and appends a call.
-3. Sets file permissions to `rwxr--r--`, adds a dependency, an environment variable, and custom entry point.
-4. Writes a self-executable `hello.afe` file with proper shebang.
-
 ---
 
-## 🔍 API Reference
+## 🔍 Structs & Methods
+
+### `AfeFile`
 
 ```rust
-/// Core structure representing the binary data of an .afe file.
 #[derive(Encode, Decode, Serialize, Deserialize, Debug, Clone)]
 pub struct AfeFile {
     pub version: u32,
     pub app_name: String,
     pub app_version: String,
     pub lua_script: String,
-    pub permissions: String,
-    pub dependencies: Vec<String>,
-    pub env_vars: HashMap<String, String>,
-    pub entry_point: String,
+    pub permissions: String, // e.g., rwxr-xr-x
+    pub using: String,       // e.g., lua54
 }
+```
 
-/// Builder for constructing and saving AfeFile instances.
-pub struct AfeBuilder { /* fields omitted */ }
+### `AfeBuilder`
 
+```rust
+pub struct AfeBuilder {
+    app_name: String,
+    app_version: String,
+    lua_script: String,
+    permissions: String,
+}
+```
+
+### Methods
+
+```rust
 impl AfeBuilder {
-    /// Create a new builder with given name and version.
     pub fn new(app_name: &str, app_version: &str) -> Self;
 
-    /// Set Unix-style file permissions (e.g., "rwxr-xr-x").
     pub fn set_permissions(&mut self, permissions: &str) -> &mut Self;
 
-    /// Add a dependency string to be included in metadata.
-    pub fn add_dependency(&mut self, dep: &str) -> &mut Self;
-
-    /// Assign an environment variable for execution.
-    pub fn set_env_var(&mut self, key: &str, value: &str) -> &mut Self;
-
-    /// Specify the Lua entry point function name.
-    pub fn set_entry_point(&mut self, func: &str) -> &mut Self;
-
-    /// Add a Lua function: name, argument list, and body.
     pub fn add_lua_function(&mut self, name: &str, args: Vec<&str>, body: &str) -> &mut Self;
 
-    /// Append raw Lua code snippet.
     pub fn add_lua_code(&mut self, code: &str) -> &mut Self;
 
-    /// Build the AfeFile struct without writing to disk.
-    pub fn build(&self) -> AfeFile;
+    pub fn build(&self, using: String) -> AfeFile;
 
-    /// Serialize and save as binary .afe file, with validation of Lua and permissions.
-    pub fn save(&self, path: &str) -> Result<(), std::io::Error>;
+    pub fn save(&self, path: &str, using: String) -> Result<(), std::io::Error>;
 }
 ```
 
@@ -121,36 +103,27 @@ impl AfeBuilder {
 
 ## 📚 Use Cases
 
-* **Game Modding**: Package Lua-based mods with versioning and permissions.
-* **Scripting Engines**: Embed scripts into a single `.afe` artifact.
-* **CI Pipelines**: Automate .afe generation in Rust build workflows.
-* **Secure Distribution**: Serialize with strict schema, validate at build time.
+- **Embedded Lua Apps**: Package small Lua utilities or tools.
+- **Lightweight Executables**: Distribute logic + metadata in one `.afe` file.
+- **Custom Lua Runtimes**: Match Lua version/environment explicitly using `using` field.
 
 ---
 
-## 🤝 Contributing
+## 🧪 Notes
 
-Contributions, suggestions, and bug reports are welcome!
-
-1. Fork the repository on [GitHub](https://github.com/yourusername/apexforge_afe).
-2. Create a feature branch: `git checkout -b feature/YourFeature`.
-3. Commit your changes: `git commit -m "Add awesome feature"`.
-4. Push to the branch: `git push origin feature/YourFeature`.
-5. Open a Pull Request.
-
-Please follow Rust community conventions and include tests for new functionality.
+- The `save()` method validates Lua code by loading it with `mlua`.
+- `using` is a free-form string (e.g., `"Printing Hello World"` or `"write hello world"`).
+- Permissions are string-based (`rwxr-xr-x`), not enforced automatically.
 
 ---
 
 ## 📜 License
 
-`apexforge_afe` is dual-licensed under the MIT License and the Apache License, Version 2.0.
+Dual-licensed under **MIT** or **Apache-2.0**.
 
-* MIT: [https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
-* Apache-2.0: [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-Select the license that best suits your project.
+- MIT: https://opensource.org/licenses/MIT  
+- Apache: https://opensource.org/licenses/Apache-2.0
 
 ---
 
-*Made with ❤️ by the ApexForge community.*
+*Made with 🦀 & ❤️ by the ApexForge community.*
